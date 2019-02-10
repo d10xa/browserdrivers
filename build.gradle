@@ -1,0 +1,23 @@
+plugins {
+    id "idea"
+    id "groovy"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly("org.spockframework:spock-core:1.2-groovy-2.5") {
+        exclude group: "org.codehaus.groovy"
+    }
+    compileOnly "org.codehaus.groovy:groovy-all:2.5.5"
+    compileOnly "org.seleniumhq.selenium:selenium-chrome-driver:3.141.59"
+    compileOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.141.59"
+    compileOnly "ch.qos.logback:logback-classic:1.2.3"
+    compile "org.gebish:geb-core:2.3.1"
+}
+
+tasks.withType(GroovyCompile) {
+    groovyOptions.forkOptions.memoryMaximumSize = '256m'
+}
