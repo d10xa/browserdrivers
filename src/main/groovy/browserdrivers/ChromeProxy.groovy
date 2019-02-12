@@ -1,6 +1,7 @@
 package browserdrivers
 
 import geb.Browser
+import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeOptions
 
 class ChromeProxy {
@@ -48,6 +49,7 @@ class ChromeProxy {
 
     void ensureProxyAuth(Browser browser) {
         browser.with {
+            initProxyAuth(browser)
             go randomIpUrl
             def myIp = $("pre").text()
             boolean authorized = myIp == proxy.host
@@ -61,13 +63,18 @@ class ChromeProxy {
         def userInfo = proxy.userInfo.split(":")
         def login = userInfo[0]
         def password = userInfo[1]
-        browser.with {
-            if ($("h1").text() != "Proxy Auto Auth") {
-                go "chrome-extension://ggmdpepbjljkkkdaklfihhngmmgmpggp/options.html"
+        def driver = browser.driver
+        def js = driver as JavascriptExecutor
+        js.executeScript("window.localStorage.setItem('proxy_login', '$login');")
+        js.executeScript("window.localStorage.setItem('proxy_password', '$password');")
+        js.executeScript("window.localStorage.setItem('proxy_retry', 5);")
+        js.executeScript("window.localStorage.setItem('proxy_locked', 'false');")
+        driver.windowHandles.each { tab ->
+            driver.switchTo().window(tab)
+            if(driver.currentUrl == "chrome-extension://ggmdpepbjljkkkdaklfihhngmmgmpggp/options.html") {
+                driver.close()
             }
-            $("#login").value(login)
-            $("#password").value(password)
-            waitFor { $("button#save").click() }
+            driver.switchTo().window(driver.windowHandles.first())
         }
     }
 }
