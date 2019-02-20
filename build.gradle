@@ -8,13 +8,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.spockframework:spock-core:1.2-groovy-2.5") {
-        exclude group: "org.codehaus.groovy"
-    }
-    compileOnly "org.codehaus.groovy:groovy-all:2.5.5"
-    compileOnly "org.seleniumhq.selenium:selenium-chrome-driver:3.141.59"
-    compileOnly "ch.qos.logback:logback-classic:1.2.3"
-    compileOnly "org.gebish:geb-core:2.3.1"
+    compile "org.codehaus.groovy:groovy-all:2.5.5"
+    compile "org.seleniumhq.selenium:selenium-chrome-driver:3.141.59"
+    compile "ch.qos.logback:logback-classic:1.2.3"
+    compile "org.gebish:geb-core:2.3.1"
 }
 
 tasks.withType(GroovyCompile) {
@@ -22,7 +19,7 @@ tasks.withType(GroovyCompile) {
 }
 
 task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
+    from sourceSets.main.allSource
     archiveClassifier = 'sources'
 }
 
