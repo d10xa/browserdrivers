@@ -36,6 +36,10 @@ class BrowserExtras {
         js.executeScript("return window.devicePixelRatio") as Integer
     }
 
+    int getPageXOffset() {
+        js.executeScript("return window.pageXOffset") as Integer
+    }
+
     int getPageYOffset() {
         js.executeScript("return window.pageYOffset") as Integer
     }
@@ -50,7 +54,7 @@ class BrowserExtras {
         def pixelRatio = devicePixelRatio
         int imgWidth = el.size.width
         int imgHeight = el.size.height
-        def x = el.location.x * pixelRatio
+        def x = (el.location.x - pageXOffset) * pixelRatio
         def y = (el.location.y - pageYOffset) * pixelRatio
         def w = imgWidth * pixelRatio
         def h = imgHeight * pixelRatio
