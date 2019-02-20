@@ -4,6 +4,9 @@ import geb.Browser
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeOptions
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 class ChromeProxy {
 
     private final URL proxy
@@ -28,17 +31,18 @@ class ChromeProxy {
     }
 
     static void addExtensionProxyAutoAuth(ChromeOptions chromeOptions) {
-        def tmpFile = File.createTempFile("browserdrivers", "Proxy-Auto-Auth_v2.0.crx")
-        ChromeProxy
+        Path tmpDir = Files.createTempDirectory("browserdrivers")
+        tmpDir.toFile().deleteOnExit()
+        InputStream inputStream = ChromeProxy
                 .getClassLoader()
                 .getResourceAsStream("Proxy-Auto-Auth_v2.0.crx")
-                .withCloseable { input ->
-            tmpFile.deleteOnExit()
-            tmpFile.withOutputStream { output ->
-                input.transferTo(output)
-            }
-        }
-        chromeOptions.addExtensions(tmpFile)
+        Path extensionFile =
+                Files.createTempFile(tmpDir, "browserdrivers", "Proxy-Auto-Auth_v2.0.crx")
+        extensionFile.toFile().deleteOnExit()
+        Files.delete(extensionFile)
+        long bytesWritten = Files.copy(inputStream, extensionFile)
+        assert bytesWritten > 0
+        chromeOptions.addExtensions(extensionFile.toFile())
     }
 
     void addArgumentProxyServer(ChromeOptions chromeOptions) {
@@ -71,7 +75,7 @@ class ChromeProxy {
         js.executeScript("window.localStorage.setItem('proxy_locked', 'false');")
         driver.windowHandles.each { tab ->
             driver.switchTo().window(tab)
-            if(driver.currentUrl == "chrome-extension://ggmdpepbjljkkkdaklfihhngmmgmpggp/options.html") {
+            if(driver.currentUrl.startsWith("chrome-extension://")) {
                 driver.close()
             }
             driver.switchTo().window(driver.windowHandles.first())
